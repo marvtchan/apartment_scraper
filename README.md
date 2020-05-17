@@ -6,4 +6,4 @@ Using BeautifulSoup4 we will scrape craigslist for apartments that match our pre
 
 The goal is to create a database of potential apartments that can be explorable through Streamlit.
 
-On Streamlit we will use Google Maps API to interact the selection of apartments.
+On Streamlit we will use Google Maps API to interact with the selection of apartments.
