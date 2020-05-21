@@ -22,11 +22,11 @@ class SQLiteConnector:
 		inspector = inspect(engine)
 		return inspector
 
-	def insert_df(self, df, connection):
+	def insert_df(df, connection):
 		""" This function is used to append df to database, if no database will create """
 		df.to_sql(df, connection, index=False, if_exists='append')
 
-	def query(self, connection, query):
+	def query(connection, query):
 		""" This function is used to query the database table"""
 		query_results = pd.read_sql_query(query, connection)
 		return query_results
