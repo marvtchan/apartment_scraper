@@ -16,6 +16,7 @@ import pandas as pd
 import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
+import pydeck as pdk
 
 
 
@@ -61,13 +62,15 @@ def main():
         	st.subheader("Raw Data")
         	st.write(data)
     elif page == "Visualize Map":
-        data = load_data()
+        df = load_data()
         st.title("Apartments in the Area")
         st.markdown(
         """
         We can visualize apartments on a map here.
 
         """)
+        selected_filtered_data, location = filter_data(df)
+        map(df, selected_filtered_data, location)
 
 
 @st.cache(persist=True)
@@ -77,6 +80,49 @@ def load_data():
 	cursor = connection.cursor()
 	data = pd.read_sql_query('SELECT * FROM listings', connection)
 	return data
+
+def filter_data(data):
+    location = st.multiselect("Enter Location", sorted(data['location'].unique()))
+    print(location)
+    selected_filtered_data = data[(data['location'].isin(location))]
+    return selected_filtered_data, location
+
+def map(df, filtered, location):
+	midpoint = (np.average(df['lat']), np.average(df['lon']))
+	layer= pdk.Layer(
+		'ScatterplotLayer',
+		data=filtered,
+		get_position='[lon, lat]',
+		auto_highlight=True,
+		pickable=True,
+		radiusScale= 120,
+		radiusMinPixels= 5,
+		getFillColor= [248, 24, 148],
+	)
+
+	view_state=pdk.ViewState(
+		latitude=midpoint[0],
+		longitude=midpoint[1],
+		zoom=4
+	)
+
+	r = pdk.Deck(
+		map_style='mapbox://styles/mapbox/light-v9',
+		layers=[layer],
+		initial_view_state=view_state,
+		tooltip={'html': '<b>Price:</b> {price}', 'style': {'color': 'white'}},
+	)
+	st.pydeck_chart(r)
+
+	location_data_is_check = st.checkbox("Display the data of selected locations")
+
+	if location_data_is_check:
+		st.subheader("Filtered data by for '%s" % (location))
+		st.write(df)
+
+	if st.checkbox("Display total data", False):
+		st.subheader("Raw data")
+		st.write(df)
 
 if __name__ == "__main__":
     main()
