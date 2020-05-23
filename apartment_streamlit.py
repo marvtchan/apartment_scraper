@@ -1,17 +1,20 @@
 # apartment_streamlit.py
-
+# streamlit
 import streamlit as st
 from streamlit import caching
 
+#database
 import sqlite3  
 from sqlalchemy import create_engine, select, MetaData, Table, Integer, String, inspect, Column, ForeignKey
 import os
 
+#datetime
 import datetime as dt
 from datetime import datetime
 from datetime import timedelta
 import dateutil.relativedelta
 
+#analysis and visualization
 import pandas as pd
 import numpy as np
 import seaborn as sns
@@ -21,6 +24,7 @@ import pydeck as pdk
 
 
 def main():
+	### Allows user to switch between pages ###
     page = st.sidebar.selectbox("Choose a page", ["Homepage", "Analysis", "Visualize Map"])
 
     if page == "Homepage":
@@ -70,9 +74,15 @@ def main():
 
         """)
         selected_filtered_data, location = filter_data(df)
+
         map(df, selected_filtered_data, location)
 
+        all_locations(df)
 
+        show_data(df, location)
+
+
+# Load Data from database
 @st.cache(persist=True)
 def load_data():
 	engine = create_engine('sqlite:////Users/marvinchan/Documents/PythonProgramming/apartment_scraper/apartments.db', echo=False)
@@ -81,12 +91,14 @@ def load_data():
 	data = pd.read_sql_query('SELECT * FROM listings', connection)
 	return data
 
+# Filter data with location
 def filter_data(data):
     location = st.multiselect("Enter Location", sorted(data['location'].unique()))
     print(location)
     selected_filtered_data = data[(data['location'].isin(location))]
     return selected_filtered_data, location
 
+# Visualize all data points on map
 def map(df, filtered, location):
 	midpoint = (np.average(df['lat']), np.average(df['lon']))
 	layer= pdk.Layer(
@@ -114,6 +126,13 @@ def map(df, filtered, location):
 	)
 	st.pydeck_chart(r)
 
+# Button to show map with all locations
+def all_locations(df):
+	if st.button("Show all locations"):
+        	map(df, df, df['location'])
+
+# Function to show data
+def show_data(df, location):
 	location_data_is_check = st.checkbox("Display the data of selected locations")
 
 	if location_data_is_check:
