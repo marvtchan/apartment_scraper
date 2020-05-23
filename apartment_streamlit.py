@@ -55,11 +55,9 @@ def main():
 
            1. Navigate to sidebar for options.
 
-           2. Select date range and categories for monthly analysis. 
+           2. Select location analysis. 
 
            3. Check filtered data and raw data for deeper insight.
-
-           4. Expense is negative while income is positive.
 
         """)
         if st.checkbox("Display total data", False):
