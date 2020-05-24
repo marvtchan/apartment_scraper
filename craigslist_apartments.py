@@ -6,11 +6,14 @@ from dateutil.parser import parse
 class Craigslist_Scraper:
 
 	def scrape_apt(params):
+		"""
+		Scrapes Craigslist for housing with passed in parameters
+		"""
 		cl = CraigslistHousing(site=params['site'], area=params['area'], category=params['category'], filters={'max_price': params['max_price'], 'min_price': params['min_price']})
 
 		results = []
 		iterations = 0
-		post = cl.get_results(sort_by='newest', geotagged=True, limit=120)
+		post = cl.get_results(sort_by='newest', geotagged=True, limit=3000, include_details=True)
 		while True:
 			try:
 				result = next(post)
@@ -30,12 +33,28 @@ class Craigslist_Scraper:
 					lat = result["geotag"][0]
 					lon = result["geotag"][1]
 
-
-
-				price = 0
+				price = 0	
 				try:
 					price = float(result["price"].replace("$", ""))
 				except Exception:
+					pass
+
+				bedrooms = 0
+				try:
+					bedrooms = float(result["bedrooms"])
+				except KeyError:
+					pass
+
+				available = ""
+				try:
+					available = result["available"]
+				except KeyError:
+					pass
+
+				sqft = ""
+				try:
+					sqft = result["area"]
+				except KeyError:
 					pass
 
 				listing = Listing(
@@ -46,6 +65,9 @@ class Craigslist_Scraper:
 	                name=result["name"],
 	                price=price,
 	                location=result["where"],
+	                sqft=sqft,
+	                bedrooms=bedrooms,
+	                availability=available,
 	                cl_id=result["id"]
 	            )
 				
