@@ -73,11 +73,11 @@ def main():
         """)
         selected_filtered_data, location = filter_data(df)
 
-        map(df, selected_filtered_data, location)
+        map(df, selected_filtered_data)
 
         all_locations(df)
 
-        show_data(df, location)
+        show_data(df, selected_filtered_data, location)
 
 
 # Load Data from database
@@ -86,18 +86,18 @@ def load_data():
 	engine = create_engine('sqlite:////Users/marvinchan/Documents/PythonProgramming/apartment_scraper/apartments.db', echo=False)
 	connection = engine.raw_connection()
 	cursor = connection.cursor()
-	data = pd.read_sql_query('SELECT * FROM listings', connection)
+	data = pd.read_sql_query('SELECT * FROM listing', connection)
 	return data
 
 # Filter data with location
 def filter_data(data):
-    location = st.multiselect("Enter Location", sorted(data['location'].unique()))
+    location = st.multiselect("Enter Location", sorted(data['city'].unique()))
     print(location)
-    selected_filtered_data = data[(data['location'].isin(location))]
+    selected_filtered_data = data[(data['city'].isin(location))]
     return selected_filtered_data, location
 
 # Visualize all data points on map
-def map(df, filtered, location):
+def map(df, filtered):
 	midpoint = (np.average(df['lat']), np.average(df['lon']))
 	layer= pdk.Layer(
 		'ScatterplotLayer',
@@ -127,15 +127,15 @@ def map(df, filtered, location):
 # Button to show map with all locations
 def all_locations(df):
 	if st.button("Show all locations"):
-        	map(df, df, df['location'])
+        	map(df, df)
 
 # Function to show data
-def show_data(df, location):
+def show_data(df, filtered, location):
 	location_data_is_check = st.checkbox("Display the data of selected locations")
 
 	if location_data_is_check:
 		st.subheader("Filtered data by for '%s" % (location))
-		st.write(df)
+		st.write(filtered)
 
 	if st.checkbox("Display total data", False):
 		st.subheader("Raw data")

@@ -3,10 +3,12 @@
 import pandas as pd
 import reverse_geocoder as rg
 
+# function for reverseg Geocode
 def reverseGeocode(coordinates): 
     result = rg.search(coordinates)
     return (result)
 
+# a function to find a city based off of coordinates
 def find_city(df):
     coordinates = list(zip(df['lat'],df['lon']))
     data = reverseGeocode(coordinates)
@@ -23,10 +25,6 @@ def creat_dict(df, col1, col2):
     dictionary = dictionary.to_dict()
     return dictionary
     
-# city_lookup = creat_dict(df, 'city', 'mapped')
-
-# df['city'] = df['mapped'].map(city_lookup)
-
 
 city_lookup_dict = {'Alameda': 'alameda',
  'Albany': 'berkeley',

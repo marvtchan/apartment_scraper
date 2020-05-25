@@ -38,6 +38,7 @@ class SQLiteConnector:
 		query_results = pd.read_sql_query(query, connection)
 		return query_results
 
+
 connection, engine = SQLiteConnector(database).create_database()
 
 Base = declarative_base()
