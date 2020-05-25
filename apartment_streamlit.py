@@ -90,6 +90,8 @@ def main():
 
         show_data(df, selected_filtered_data, location, bedroom)
 
+        show_listing(df)
+
 
 # Load Data from database
 @st.cache(persist=True)
@@ -135,7 +137,7 @@ def map(df, filtered):
 		map_style='mapbox://styles/mapbox/light-v9',
 		layers=[layer],
 		initial_view_state=view_state,
-		tooltip={'html': '<b>ID:</b> {cl_id} <br><b>Price:</b> {price} <br><b>Rooms:</b> {bedrooms}', 'style': {'color': 'white'}},
+		tooltip={'html': '<b>ID:</b> {id} <br><b>Price:</b> {price} <br><b>Rooms:</b> {bedrooms}', 'style': {'color': 'white'}},
 	)
 	st.pydeck_chart(r)
 
@@ -155,6 +157,17 @@ def show_data(df, filtered, location, bedroom):
 	if st.checkbox("Display total data", False):
 		st.subheader("Raw data")
 		st.write(df)
+
+def show_listing(df):
+    index = st.text_input("Enter ID")
+    if st.button("Show Listing"):
+        try:
+            st.write(df.ix[int(index) - 1])
+        except (ValueError, KeyError):
+            st.error('Inputted ID does not exist.')
+
+
+
 
 if __name__ == "__main__":
     main()
