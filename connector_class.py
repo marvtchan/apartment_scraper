@@ -8,8 +8,8 @@ from sqlalchemy.orm import sessionmaker, relationship
 # establish connection
 
 import pandas as pd
-pd.set_option('display.max_rows', 500)
-pd.set_option('display.max_columns', 500)
+pd.set_option('display.max_rows', 3000)
+pd.set_option('display.max_columns', 300)
 pd.set_option('display.width', 1000)
 
 database = 'apartments'
@@ -47,7 +47,7 @@ class Listing(Base):
     A table to store data on craigslist listings.
     """
 
-    __tablename__ = 'listings'
+    __tablename__ = 'listing'
 
     id = Column(Integer, primary_key=True)
     link = Column(String, unique=True)
@@ -58,7 +58,12 @@ class Listing(Base):
     name = Column(String)
     price = Column(Float)
     location = Column(String)
+    sqft = Column(String)
+    bedrooms = Column(Float)
+    availability = Column(String)
     cl_id = Column(Integer, unique=True)
+    city = Column(String)
+    mapped = Column(String)
 
 
 Base.metadata.create_all(engine)
@@ -72,7 +77,7 @@ inspector = SQLiteConnector.inspector(engine)
 
 print(inspector.get_table_names())
 
-query = "SELECT * from listings"
+query = "SELECT * from listing"
 
 if __name__ == '__main__':
 	print(SQLiteConnector.query(connection,query))

@@ -3,6 +3,9 @@
 from craigslist import CraigslistHousing
 from connector_class import connection, session, Listing
 from dateutil.parser import parse
+
+from city_lookup import reverseGeocode, city_lookup_dict
+
 class Craigslist_Scraper:
 
 	def scrape_apt(params):
@@ -57,6 +60,23 @@ class Craigslist_Scraper:
 				except KeyError:
 					pass
 
+				mapped = ""
+				try:
+					coordinates = list((lat, lon))
+					data = reverseGeocode(coordinates)
+					index = [i['name'] for i in data]
+					mapped = index[0]
+				except KeyError:
+					pass
+
+				city = "none"
+				try: 
+					city = (city_lookup_dict.get(mapped, "none"))
+				except KeyError: 
+					pass
+
+
+				# prepares results in a class for SQLite database
 				listing = Listing(
 					link=result["url"],
 	                created=parse(result["datetime"]),
@@ -68,7 +88,9 @@ class Craigslist_Scraper:
 	                sqft=sqft,
 	                bedrooms=bedrooms,
 	                availability=available,
-	                cl_id=result["id"]
+	                cl_id=result["id"],
+	                city=city,
+	                mapped=mapped
 	            )
 				
 				session.add(listing)
