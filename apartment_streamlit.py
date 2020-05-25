@@ -17,8 +17,11 @@ import dateutil.relativedelta
 #analysis and visualization
 import pandas as pd
 import numpy as np
+from numpy import median, average
 import seaborn as sns
 import matplotlib.pyplot as plt
+from matplotlib import rcParams
+rcParams.update({'figure.autolayout': True})
 import pydeck as pdk
 import altair as alt
 alt.data_transformers.disable_max_rows()
@@ -73,11 +76,38 @@ def main():
            3. Check filtered data and raw data for deeper insight.
 
         """)
+        
+        selected_filtered_data, location, bedroom = filter_data(data)
+        binned_scatter(selected_filtered_data)
+        if st.checkbox("Display filtered data", False):
+            st.subheader("Filtered Data")
+            st.write(selected_filtered_data)
         if st.checkbox("Display total data", False):
-        	st.subheader("Raw Data")
-        	st.write(data)
+            st.subheader("Raw Data")
+            st.write(data)
 
-        binned_scatter(data)
+        selected_bedrooms, bedroom  = filter_bedrooms(data)
+
+        bar_chart = st.selectbox("Choose an estimator", ["Average", "Median", "Count"])
+
+        if bar_chart == "Average":
+            try:
+                average_bar(selected_bedrooms, average)
+            except ValueError:
+                pass
+
+        elif bar_chart == "Median":
+            try:
+                average_bar(selected_bedrooms, median)
+            except  ValueError:
+                pass
+
+        elif bar_chart == "Count":
+            try:
+                count_bar(selected_bedrooms)
+            except ValueError:
+                pass
+
     elif page == "Visualize Map":
         df = load_data()
         st.title("Apartments in the Area")
@@ -113,7 +143,6 @@ def load_data():
 def filter_data(data):
     location = st.multiselect("Enter Location", sorted(data['city'].unique()))
     bedroom = st.multiselect("Enter Bedrooms", sorted(data['bedrooms'].unique()))
-    print(location)
     selected_filtered_data = data[(data['city'].isin(location))&(data['bedrooms'].isin(bedroom))]
     return selected_filtered_data, location, bedroom
 
@@ -184,7 +213,24 @@ def binned_scatter(df):
     ).interactive()
     st.altair_chart(chart)
 
+def filter_bedrooms(data):
+    bedroom = st.multiselect("Enter bedrooms for bar chart", sorted(data['bedrooms'].unique()))
+    selected_filtered_data = data[(data['bedrooms'].isin(bedroom))]
+    return selected_filtered_data, bedroom
 
+def average_bar(data, estimator):
+    plt.figure(figsize=(8,5))
+    plt.xticks(rotation=45, horizontalalignment='right', fontweight='light', fontsize='medium')
+    plt.tight_layout()
+    ax = sns.barplot(x="city", y="price", data=data, estimator=estimator)    
+    st.pyplot()
+
+def count_bar(data):
+    plt.figure(figsize=(8,5))
+    plt.xticks(rotation=45, horizontalalignment='right', fontweight='light', fontsize='medium')
+    plt.tight_layout()
+    ax = sns.countplot(x='city', data=data)
+    st.pyplot()
 
 if __name__ == "__main__":
     main()
