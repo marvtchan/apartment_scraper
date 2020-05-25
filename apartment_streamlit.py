@@ -34,11 +34,22 @@ def main():
    			This is an exploratory page for searching an apartment in the Bay Area.
 
         """)
-        st.subheader("Analysis")
+        st.subheader("Analyze")
         st.markdown(
         """
-        We can analyze the apartment market here
+        We can analyze the apartment market on the 'Analysis' page.
         """)
+        st.subheader("Visualize")
+        st.markdown(
+        """
+        Proceed to the Visualize Map page to filter for apartments by location.
+        """)
+        st.markdown(
+        """
+        Below is a map of all available craigslist housing options:
+        """)
+        df = load_data()
+        map(df, df)
         st.sidebar.text(" ")
         st.sidebar.text(" ")
         st.sidebar.text(" ")
@@ -71,30 +82,34 @@ def main():
         We can visualize apartments on a map here.
 
         """)
-        selected_filtered_data, location = filter_data(df)
+        selected_filtered_data, location, bedroom = filter_data(df)
 
         map(df, selected_filtered_data)
 
         all_locations(df)
 
-        show_data(df, selected_filtered_data, location)
+        show_data(df, selected_filtered_data, location, bedroom)
 
 
 # Load Data from database
 @st.cache(persist=True)
 def load_data():
-	engine = create_engine('sqlite:////Users/marvinchan/Documents/PythonProgramming/apartment_scraper/apartments.db', echo=False)
-	connection = engine.raw_connection()
-	cursor = connection.cursor()
-	data = pd.read_sql_query('SELECT * FROM listing', connection)
-	return data
+    engine = create_engine('sqlite:////Users/marvinchan/Documents/PythonProgramming/apartment_scraper/apartments.db', echo=False)
+    connection = engine.raw_connection()
+    cursor = connection.cursor()
+    data = pd.read_sql_query('SELECT * FROM listing', connection)
+    data['bedrooms'] = data['bedrooms'].astype(str).replace("0.0", "Studio")
+    data['bedrooms'] = data['bedrooms'].str.replace(".0", "")
+    return data
+
 
 # Filter data with location
 def filter_data(data):
     location = st.multiselect("Enter Location", sorted(data['city'].unique()))
+    bedroom = st.multiselect("Enter Bedrooms", sorted(data['bedrooms'].unique()))
     print(location)
-    selected_filtered_data = data[(data['city'].isin(location))]
-    return selected_filtered_data, location
+    selected_filtered_data = data[(data['city'].isin(location))&(data['bedrooms'].isin(bedroom))]
+    return selected_filtered_data, location, bedroom
 
 # Visualize all data points on map
 def map(df, filtered):
@@ -120,7 +135,7 @@ def map(df, filtered):
 		map_style='mapbox://styles/mapbox/light-v9',
 		layers=[layer],
 		initial_view_state=view_state,
-		tooltip={'html': '<b>Price:</b> {price}', 'style': {'color': 'white'}},
+		tooltip={'html': '<b>ID:</b> {cl_id} <br><b>Price:</b> {price} <br><b>Rooms:</b> {bedrooms}', 'style': {'color': 'white'}},
 	)
 	st.pydeck_chart(r)
 
@@ -130,11 +145,11 @@ def all_locations(df):
         	map(df, df)
 
 # Function to show data
-def show_data(df, filtered, location):
+def show_data(df, filtered, location, bedroom):
 	location_data_is_check = st.checkbox("Display the data of selected locations")
 
 	if location_data_is_check:
-		st.subheader("Filtered data by for '%s" % (location))
+		st.subheader("Filtered data by for '%s & '%s rooms" % (location, bedroom))
 		st.write(filtered)
 
 	if st.checkbox("Display total data", False):
