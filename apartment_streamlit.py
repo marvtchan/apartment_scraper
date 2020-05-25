@@ -20,6 +20,8 @@ import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 import pydeck as pdk
+import altair as alt
+alt.data_transformers.disable_max_rows()
 
 
 
@@ -74,6 +76,8 @@ def main():
         if st.checkbox("Display total data", False):
         	st.subheader("Raw Data")
         	st.write(data)
+
+        binned_scatter(data)
     elif page == "Visualize Map":
         df = load_data()
         st.title("Apartments in the Area")
@@ -100,7 +104,7 @@ def load_data():
     connection = engine.raw_connection()
     cursor = connection.cursor()
     data = pd.read_sql_query('SELECT * FROM listing', connection)
-    data['bedrooms'] = data['bedrooms'].astype(str).replace("0.0", "Studio")
+    data['bedrooms'] = data['bedrooms'].astype(str).replace("0.0", "Studio/Bedroom")
     data['bedrooms'] = data['bedrooms'].str.replace(".0", "")
     return data
 
@@ -166,6 +170,19 @@ def show_listing(df):
         except (ValueError, KeyError):
             st.error('Inputted ID does not exist.')
 
+def binned_scatter(df):
+    source = df
+    chart = alt.Chart(source).mark_circle().properties(
+    width = 700,
+    height = 500,
+    ).encode(
+        alt.X('bedrooms', bin=True),
+        alt.Y('price', bin=True),
+        size='count()',
+        color='city',
+        tooltip=['city', 'price', 'bedrooms']
+    ).interactive()
+    st.altair_chart(chart)
 
 
 
