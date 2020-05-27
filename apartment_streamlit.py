@@ -37,7 +37,14 @@ def main():
         st.markdown(
         """
    			This is an exploratory page for searching an apartment in the Bay Area.
-
+        """)
+        st.markdown(
+        """
+            The data presented is scraped from craigslist and filtered for prices between $1,000 and $3,000. 
+        """)
+        st.markdown(
+        """
+            The area is East Bay.  
         """)
         st.subheader("Analyze")
         st.markdown(
@@ -60,7 +67,6 @@ def main():
         st.sidebar.text(" ")
         st.sidebar.success('Explore the datasets with the \'Analysis\' page or visualize the listing with the \'Visualize Map\' page.')
     elif page == "Analysis":
-        caching.clear_cache()
         data = load_data()
         st.title("📈Analysis📉")
         st.markdown(
@@ -69,11 +75,13 @@ def main():
 
         To analyze:
 
-           1. Navigate to sidebar for options.
+           1. Navigate below for options.
 
-           2. Select location analysis. 
+           2. Select location and bedroom for binned scatter plot analysis. 
 
-           3. Check filtered data and raw data for deeper insight.
+           3. Choose average, median, count and bedrooms for bar plot analysis.
+
+           4. Check filtered data and raw data for deeper insight.
 
         """)
         
@@ -82,9 +90,7 @@ def main():
         if st.checkbox("Display filtered data", False):
             st.subheader("Filtered Data")
             st.write(selected_filtered_data)
-        if st.checkbox("Display total data", False):
-            st.subheader("Raw Data")
-            st.write(data)
+
 
         selected_bedrooms, bedroom  = filter_bedrooms(data)
 
@@ -107,6 +113,10 @@ def main():
                 count_bar(selected_bedrooms)
             except ValueError:
                 pass
+
+        if st.checkbox("Display total data", False):
+            st.subheader("Raw Data")
+            st.write(data)
 
     elif page == "Visualize Map":
         df = load_data()
@@ -155,7 +165,7 @@ def map(df, filtered):
 		get_position='[lon, lat]',
 		auto_highlight=True,
 		pickable=True,
-		radiusScale= 120,
+		radiusScale= 80,
 		radiusMinPixels= 5,
 		getFillColor= [248, 24, 148],
 	)
