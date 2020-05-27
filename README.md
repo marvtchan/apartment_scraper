@@ -10,7 +10,7 @@ On Streamlit we will use OpenStreetMap API to interact with the selection of apa
 
 On the Analysis Page users can filter for their selection and explore visualizations based on location and bedrooms.
 
-![image](https://user-images.githubusercontent.com/49408616/83073504-68c20000-a025-11ea-823e-9c25e8284c66.png)
+![image](https://user-images.githubusercontent.com/49408616/83074495-1eda1980-a027-11ea-9697-0829be5aaf56.png)
 
 On the Visualize Map page, the listings are plotted on a map and users can hover over each listing to see more detail.
 
